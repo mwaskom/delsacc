@@ -1,10 +1,8 @@
 from __future__ import division
-import json
 
 import numpy as np
 import pandas as pd
 
-from psychopy import core, visual
 from visigoth import AcquireFixation, AcquireTarget, flexible_values
 from visigoth.stimuli import Point
 
@@ -28,20 +26,39 @@ def generate_trials(exp):
 
     for t in exp.trial_count():
 
-        target_x, target_y = flexible_values(exp.p.target_positions)
+        now = exp.clock.getTime()
 
-        wait_iti = flexible_values(exp.p.wait_iti)
-        wait_delay = flexible_values(exp.p.wait_delay)
+        target_x, target_y = flexible_values(exp.p.target_positions)
 
         info = exp.trial_info(
 
-            wait_iti=wait_iti,
-            wait_cue=exp.p.wait_cue,
-            wait_delay=wait_delay,
+            wait_iti=flexible_values(exp.p.wait_iti),
+            wait_start=flexible_values(exp.p.wait_start),
+            wait_cue=flexible_values(exp.p.wait_cue),
+            wait_delay=flexible_values(exp.p.wait_start),
+
             target_x=target_x,
             target_y=target_y,
+            sacc_x=np.nan,
+            sacc_y=np.nan,
+
+            onset_fix=np.nan,
+            onset_cue=np.nan,
+            offset_fix=np.nan,
+            onset_sacc=np.nan,
+            onset_feedback=np.nan,
 
         )
+
+        estimated_trial_end = (now
+                               + info.wait_iti
+                               + info.wait_start
+                               + info.wait_cue
+                               + info.wait_delay
+                               + 2)
+
+        if estimated_trial_end > exp.p.run_duration:
+            raise StopIteration
 
         yield info
 
@@ -59,13 +76,7 @@ def run_trial(exp, info):
     exp.s.fix.color = exp.p.fix_trial_color
 
     res = exp.wait_until(AcquireFixation(exp),
-                         timeout=exp.p.wait_fix,
                          draw="fix")
-
-    if res is None:
-        info["result"] = "nofix"
-        exp.sounds.nofix.play()
-        return info
 
     # ~~~ Cue period
     exp.wait_until(timeout=exp.p.wait_cue, draw=["fix", "target"])
@@ -94,3 +105,5 @@ def run_trial(exp, info):
     exp.show_feedback("target", info["result"])
     exp.wait_until(timeout=exp.p.wait_feedback, draw="target")
     exp.s.target.color = exp.p.target_color
+
+    return info
