@@ -35,7 +35,7 @@ def generate_trials(exp):
             wait_iti=flexible_values(exp.p.wait_iti),
             wait_start=flexible_values(exp.p.wait_start),
             wait_cue=flexible_values(exp.p.wait_cue),
-            wait_delay=flexible_values(exp.p.wait_start),
+            wait_delay=flexible_values(exp.p.wait_delay),
 
             target_x=target_x,
             target_y=target_y,
@@ -65,24 +65,24 @@ def generate_trials(exp):
 
 def run_trial(exp, info):
 
+    # Set up the target for this trial
     pos = info.target_x, info.target_y
     exp.s.target.dot.pos = pos
     exp.p.target_pos = [pos]
 
+    # ~~~ Inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
     exp.wait_until(exp.iti_end, draw="fix", iti_duration=info.wait_iti)
 
     # ~~~ Trial onset
     exp.s.fix.color = exp.p.fix_trial_color
-
-    res = exp.wait_until(AcquireFixation(exp),
-                         draw="fix")
+    exp.wait_until(exp.check_abort, info.wait_start, draw="fix")
 
     # ~~~ Cue period
-    exp.wait_until(timeout=exp.p.wait_cue, draw=["fix", "target"])
+    exp.wait_until(exp.check_abort, info.wait_cue, draw=["fix", "target"])
 
     # ~~~ Delay period
-    exp.wait_until(timeout=info.wait_delay, draw=["fix"])
+    exp.wait_until(exp.check_abort, info.wait_delay, draw="fix")
 
     # ~~~ Response period
     acq_targ = AcquireTarget(exp, 0)
@@ -90,6 +90,7 @@ def run_trial(exp, info):
                          timeout=exp.p.wait_response,
                          draw=None)
 
+    # Handle the response
     if res is None:
         # This means the eye never left the fixation window
         info["result"] = "nochoice"
@@ -99,11 +100,15 @@ def run_trial(exp, info):
         res.update(responded=True,
                    result="wrong",
                    rt=acq_targ.fix_break_time)
-
     info.update(pd.Series(res))
+
+    # Provide feedback
     exp.sounds[info.result].play()
     exp.show_feedback("target", info["result"])
-    exp.wait_until(timeout=exp.p.wait_feedback, draw="target")
+    exp.wait_until(exp.check_abort, exp.p.wait_feedback, draw="target")
     exp.s.target.color = exp.p.target_color
+
+    # ~~~ Return to fixation
+    exp.wait_until(AcquireFixation(exp), draw="fix")
 
     return info

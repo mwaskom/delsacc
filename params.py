@@ -5,6 +5,7 @@ base = dict(
     display_luminance=35,
 
     monitor_eye=True,
+    eye_fixation=True,
     eye_response=True,
 
     fix_iti_color=(-.9, -.9, -.9),
@@ -16,8 +17,9 @@ base = dict(
     target_positions=[(10, 5), (10, -5), (-10, -5), (-10, 5)],
 
     wait_iti=2,
+    wait_start=("truncexpon", .5, .5, 1),
     wait_cue=.2,
-    wait_delay=[2, 4],
+    wait_delay=[4, 8, 12],
     wait_response=2,
     wait_feedback=1,
 
@@ -29,8 +31,9 @@ scan = base.copy()
 scan.update(
 
     display_name="nyu-cbi-propixx",
+
     trigger=["5"],
 
-    wait_pre_run=0,
+    wait_iti=("truncexpon", 2, 2, 4),
 
 )
