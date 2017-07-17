@@ -79,12 +79,15 @@ def run_trial(exp, info):
                          timeout=exp.p.wait_response,
                          draw=None)
 
-    # Change AcquireTarget to track final position
-    # or get it straight from the eyetracker
     if res is None:
+        # This means the eye never left the fixation window
         info["result"] = "nochoice"
     elif res["result"] == "nochoice":
-        res.update(responded=True, result="wrong", rt=acq_targ.fix_break_time)
+        # This means the eye left the fixation window
+        # but did not end up in the window corresponding to the target
+        res.update(responded=True,
+                   result="wrong",
+                   rt=acq_targ.fix_break_time)
 
     info.update(pd.Series(res))
     exp.sounds[info.result].play()

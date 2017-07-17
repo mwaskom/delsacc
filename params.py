@@ -9,14 +9,14 @@ base = dict(
 
     fix_iti_color=(-.9, -.9, -.9),
 
-    target_color=1,
-    target_radius=.3,
-    target_window=1,
+    target_color=(.8, .6, -.8),
+    target_radius=.2,
+    target_window=1.5,
 
     target_positions=[(10, 5), (10, -5), (-10, -5), (-10, 5)],
 
     wait_iti=2,
-    wait_cue=.5,
+    wait_cue=.2,
     wait_delay=[2, 4],
     wait_response=2,
     wait_feedback=1,
