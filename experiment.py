@@ -107,6 +107,7 @@ def run_trial(exp, info):
         # but did not end up in the window corresponding to the target
         res.update(responded=True,
                    result="wrong",
+                   correct=False,
                    rt=acq_targ.fix_break_time)
     info.update(pd.Series(res))
     info.onset_response = exp.clock.getTime()
