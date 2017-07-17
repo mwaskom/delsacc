@@ -11,7 +11,7 @@ base = dict(
     fix_iti_color=(-.9, -.9, -.9),
 
     target_color=(.8, .6, -.8),
-    target_radius=.2,
+    target_radius=.25,
     target_window=1.5,
 
     target_positions=[(10, 5), (10, -5), (-10, -5), (-10, 5)],
