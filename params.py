@@ -25,6 +25,8 @@ base = dict(
 
     run_duration=540,
 
+    perform_acc_target=.8,
+
 )
 
 scan = base.copy()
