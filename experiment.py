@@ -42,11 +42,12 @@ def generate_trials(exp):
             sacc_x=np.nan,
             sacc_y=np.nan,
 
-            onset_fix=np.nan,
+            onset_trial=np.nan,
             onset_cue=np.nan,
-            offset_fix=np.nan,
-            onset_sacc=np.nan,
+            onset_delay=np.nan,
+            onset_response=np.nan,
             onset_feedback=np.nan,
+            onset_reset=np.nan,
 
         )
 
@@ -76,15 +77,22 @@ def run_trial(exp, info):
 
     # ~~~ Trial onset
     exp.s.fix.color = exp.p.fix_trial_color
+    info.onset_trial = exp.clock.getTime()
+    exp.tracker.send_message("Trial {} onset".format(info.trial))
     exp.wait_until(exp.check_abort, info.wait_start, draw="fix")
 
     # ~~~ Cue period
+    info.onset_cue = exp.clock.getTime()
+    exp.tracker.send_message("Trial {} cue".format(info.trial))
     exp.wait_until(exp.check_abort, info.wait_cue, draw=["fix", "target"])
 
     # ~~~ Delay period
+    info.onset_delay = exp.clock.getTime()
+    exp.tracker.send_message("Trial {} delay".format(info.trial))
     exp.wait_until(exp.check_abort, info.wait_delay, draw="fix")
 
     # ~~~ Response period
+    exp.tracker.send_message("Trial {} response".format(info.trial))
     acq_targ = AcquireTarget(exp, 0)
     res = exp.wait_until(acq_targ,
                          timeout=exp.p.wait_response,
@@ -101,14 +109,19 @@ def run_trial(exp, info):
                    result="wrong",
                    rt=acq_targ.fix_break_time)
     info.update(pd.Series(res))
+    info.onset_response = exp.clock.getTime()
 
     # Provide feedback
+    exp.tracker.send_message("Trial {} feedback".format(info.trial))
+    info.onset_feedback = exp.clock.getTime()
     exp.sounds[info.result].play()
     exp.show_feedback("target", info["result"])
     exp.wait_until(exp.check_abort, exp.p.wait_feedback, draw="target")
     exp.s.target.color = exp.p.target_color
 
     # ~~~ Return to fixation
+    exp.tracker.send_message("Trial {} reset".format(info.trial))
+    info.onset_reset = exp.clock.getTime()
     exp.wait_until(AcquireFixation(exp), draw="fix")
 
     return info
