@@ -36,6 +36,6 @@ scan.update(
 
     trigger=["5"],
 
-    wait_iti=("truncexpon", 2, 2, 4),
+    wait_iti=("truncexpon", 2, 6, 3),
 
 )
