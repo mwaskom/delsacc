@@ -33,8 +33,8 @@ scan = base.copy()
 scan.update(
 
     display_name="nyu-cbi-propixx",
-
     trigger=["5"],
+    eye_host_address="192.168.1.5",
 
     wait_iti=("truncexpon", 2, 6, 3),
 
